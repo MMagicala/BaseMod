@@ -5,26 +5,34 @@ import com.megacrit.cardcrawl.helpers.FontHelper;
 import org.w3c.dom.ranges.RangeException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class ModNumberWidget {
     private static final int UI_PADDING = 10;
     private static final int LABEL_SPACE_WIDTH = 50;
     private int lowestOffset;
+    private ArrayList<ModLabeledButton> btns;
 
-    public ModNumberWidget(ModPanel modPanel, SpireConfig config, String key, int x, int y) throws Exception {
+    public ModNumberWidget(final ModPanel modPanel, final int value, final int x, final int y, final Consumer onValueChanged) throws Exception {
         // Input validation
-        if(modPanel == null){
-            
-        }
-
-        if(config.getInt(key) < 0){
+        if (value < 0) {
             throw new Exception("Value cannot be below zero");
         }
 
-        int digitCount = Integer.toString(value).length();
-        lowestOffset = (int)Math.pow(10, digitCount-1);
+        btns = new ArrayList<>();
 
-        int[] deltas = {-10*lowestOffset, -lowestOffset, lowestOffset, 10*lowestOffset};
+        // Create center label
+        ModLabel centerLabel = new ModLabel(Integer.toString(value), x + UI_PADDING + LABEL_SPACE_WIDTH/2f, y, FontHelper.charTitleFont, modPanel, me -> {
+        });
+        modPanel.addUIElement(centerLabel);
+
+        // Create btns
+
+        int digitCount = Integer.toString(value).length();
+        lowestOffset = (int) Math.pow(10, digitCount - 1);
+
+        int[] deltas = {-10 * lowestOffset, -lowestOffset, lowestOffset, 10 * lowestOffset};
         for (int i = 0; i < 4; i++) {
             StringBuilder sb = new StringBuilder();
             if (deltas[i] > 0) {
@@ -32,35 +40,39 @@ public class ModNumberWidget {
             }
             sb.append(deltas[i]);
             int xPos = x + i * UI_PADDING;
-            if(i > 1){
+            if (i > 1) {
                 xPos += LABEL_SPACE_WIDTH;
             }
+            int index = i;
             ModLabeledButton deltaBtn = new ModLabeledButton(sb.toString(), xPos, y, modPanel, (btn) -> {
-/*
-                if (config.getInt(TIME_LEFT_KEY) > 0) {
-                    config.setInt(TIME_LEFT_KEY, config.getInt(TIME_LEFT_KEY) + deltas[index]);
-                    // Time left cannot be below 0
-                    if (config.getInt(TIME_LEFT_KEY) < 0) {
-                        config.setInt(TIME_LEFT_KEY, 0);
+                if (value > 0) {
+                    int v = value;
+                    v += deltas[index];
+                    // Value cannot be below zero
+                    if(v < 0){
+                        v = 0;
                     }
 
-                  // Update label
-                label.text = Integer.toString(config.getInt(TIME_LEFT_KEY));
+                    // Update label
+                    centerLabel.text = Integer.toString(v);
 
-                try {
-                    config.save();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    // TODO: Run defined code
                 }
-*/
-            });
+            }
+            );
             modPanel.addUIElement(deltaBtn);
+            btns.add(deltaBtn);
         }
-
-        // Center label
-        ModLabel centerLabel = new ModLabel(Integer.toString(value), x + UI_PADDING * 1.5f, y, FontHelper.charTitleFont, modPanel, me -> {});
-        modPanel.addUIElement(centerLabel);
     }
 
-    private void
+    private void increaseOffsetByTen(){
+        lowestOffset *= 10;
+        for(ModLabeledButton btn: btns){
+            applyNewOffset();
+        }
+    }
+
+    private void applyNewOffset(){
+
+    }
 }
