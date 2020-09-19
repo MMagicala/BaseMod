@@ -81,29 +81,43 @@ public class ModNumberWidget {
             }
             );
             modPanel.addUIElement(deltaBtn);
+            btns[i] = deltaBtn;
         }
-        applyOffset();
+        applyOffsetToLabels();
     }
 
     // false = decrease offset
     private void changeOffset(boolean increaseOffset) {
         if(increaseOffset){
             lowestOffset *= 10;
+            // Limit for offset is 1
         }else if(lowestOffset >= 10){
             lowestOffset /= 10;
         }
-        applyOffset();
+        applyOffsetToLabels();
     }
 
-    private void applyOffset(){
-        int[] deltas = {-10 * lowestOffset, -lowestOffset, lowestOffset, 10 * lowestOffset};
-        for (int i = 0; i < 4; i++) {
-            StringBuilder sb = new StringBuilder();
-            if (deltas[i] > 0) {
-                sb.append('+');
+    private void applyOffsetToLabels(){
+        // Determine labels for btns
+        int[] deltas = new int[btns.length];
+        for(int i = 0; i < 2; i++){
+            // Determine sign
+            char sign = i == 0 ? '-' : '+';
+            // Create labels for each side
+            for(int j = 0; j < btns.length/2; j++){
+                StringBuilder sb = new StringBuilder();
+                // Determine sign and appropriate index
+                int idx = j;
+                if(i == 1){
+                    idx += btns.length/2;
+                }
+                sb.append(sign);
+
+                float multiplier = btns.length/2f - (j + 1);
+                deltas[idx] = (int)Math.pow(10, multiplier)*lowestOffset;
+                sb.append(deltas[j+btns.length/2]);
+                btns[]
             }
-            sb.append(deltas[i]);
-            btns[i].label = sb.toString();
         }
     }
 }
